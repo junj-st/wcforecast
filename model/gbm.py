@@ -79,10 +79,13 @@ def evaluate_pipeline(history, test_fraction: float = 0.2) -> dict:
     """Honest, leak-free comparison of Elo baseline vs GBM vs blend."""
     from .poisson_model import PoissonModel
     from .features import build_features
+    from data.history import decay_weight
 
     n = len(history)
     cut = int(n * (1 - test_fraction))
-    poisson = PoissonModel().fit(history[:cut])      # train-only: no test leakage
+    tr = history[:cut]
+    poisson = PoissonModel().fit(                     # train-only: no test leakage
+        tr, weights=[m.weight * decay_weight(m.date) for m in tr])
     X, y, w, _ = build_features(history, poisson)
     Xtr, Xte, ytr, yte, wtr = X[:cut], X[cut:], y[:cut], y[cut:], w[:cut]
 

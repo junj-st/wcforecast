@@ -45,9 +45,13 @@ class TeamState:
 
 
 class EloModel:
-    def __init__(self, k: float = 32.0, priors: dict[str, float] | None = None):
+    def __init__(self, k: float = 32.0, priors: dict[str, float] | None = None,
+                 freeze_ratings: bool = False):
+        """If freeze_ratings, seeded ratings stay fixed (we trust the published
+        eloratings table); updates then only populate recent-form buffers."""
         self.k = k
         self.priors = priors or {}
+        self.freeze_ratings = freeze_ratings
         self.teams: dict[str, TeamState] = {}
 
     def state(self, team: str) -> TeamState:
@@ -68,12 +72,13 @@ class EloModel:
                weight: float = 1.0, neutral: bool = False) -> None:
         """Process one result: update ratings, then push into form buffers."""
         h, a = self.state(home), self.state(away)
-        exp_h = self.expected_home(home, away, neutral=neutral)
-        score_h = 1.0 if hg > ag else 0.5 if hg == ag else 0.0
-        k_eff = self.k * weight * _goal_multiplier(abs(hg - ag))
-        delta = k_eff * (score_h - exp_h)
-        h.rating += delta
-        a.rating -= delta
+        if not self.freeze_ratings:
+            exp_h = self.expected_home(home, away, neutral=neutral)
+            score_h = 1.0 if hg > ag else 0.5 if hg == ag else 0.0
+            k_eff = self.k * weight * _goal_multiplier(abs(hg - ag))
+            delta = k_eff * (score_h - exp_h)
+            h.rating += delta
+            a.rating -= delta
         for st, gf, ga in ((h, hg, ag), (a, ag, hg)):
             st.recent.append((gf, ga))
             st.games += 1

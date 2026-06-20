@@ -1,14 +1,18 @@
-"""Pre-tournament Elo priors from eloratings.net (World Football Elo Ratings).
+"""Team strength from eloratings.net (World Football Elo Ratings).
 
-Bootstrapping ratings from scratch (everyone at 1500) let teams with thin,
-friendly-padded records drift too high. Instead we seed each team with a real,
-published strength estimate from the END OF 2021 — just before our training
-history begins — then update forward. Because the prior predates the history
-window, re-walking 2022+ results neither double-counts nor leaks.
+We anchor every team to its CURRENT published Elo — the live 2026 table, which
+already folds in the 2025 qualifiers, recent form, and the ongoing tournament, and
+naturally weights recent results more as it evolves. This keeps the forecast
+current (a rising squad climbs, a fading one drops) without letting thin friendly
+records float, because the rating is professionally maintained.
+
+We do NOT re-walk our 2022-2024 history on top of this rating — that would
+double-count, since the current table already includes those results. The history
+is used only for the Poisson scoreline model and the GBM (both time-decayed).
 
 eloratings.net exposes two flat files we join on country code:
   en.teams.tsv : CODE -> full country name
-  2021.tsv     : CODE -> end-of-2021 Elo (rating in column index 3)
+  <year>.tsv   : CODE -> Elo for that year (rating in column index 3)
 """
 from __future__ import annotations
 
@@ -20,7 +24,8 @@ from .aliases import canonical
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "data" / "cache"
 NAMES_URL = "https://www.eloratings.net/en.teams.tsv"
-PRIOR_YEAR_URL = "https://www.eloratings.net/2021.tsv"  # end-2021 snapshot
+CURRENT_YEAR = 2026
+RATINGS_URL = f"https://www.eloratings.net/{CURRENT_YEAR}.tsv"  # live current table
 
 BASE_RATING = 1500.0
 
@@ -37,9 +42,12 @@ def _fetch(url: str, cache_name: str, force: bool = False) -> str:
 
 
 def load_elo_priors(force: bool = False) -> dict[str, float]:
-    """Return {canonical_team_name: end-2021 Elo rating}."""
+    """Return {canonical_team_name: current (2026) Elo rating}.
+
+    Pass force=True to re-fetch the live table as the tournament progresses.
+    """
     names_raw = _fetch(NAMES_URL, "eloratings_teams.tsv", force)
-    ratings_raw = _fetch(PRIOR_YEAR_URL, "eloratings_2021.tsv", force)
+    ratings_raw = _fetch(RATINGS_URL, f"eloratings_{CURRENT_YEAR}.tsv", force)
 
     code_to_name: dict[str, str] = {}
     for line in names_raw.splitlines():
@@ -65,7 +73,7 @@ def load_elo_priors(force: bool = False) -> dict[str, float]:
 
 if __name__ == "__main__":
     p = load_elo_priors()
-    print(f"Loaded {len(p)} Elo priors (end-2021).")
+    print(f"Loaded {len(p)} current Elo ratings ({CURRENT_YEAR}).")
     for t in ["brazil", "france", "argentina", "spain", "colombia", "japan",
               "germany", "england", "usa", "czechia"]:
         print(f"  {t:12} {p.get(t, BASE_RATING):.0f}")

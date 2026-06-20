@@ -58,17 +58,21 @@ def label(home_goals: int, away_goals: int) -> int:
 def build_features(matches, poisson: PoissonModel, elo: EloModel | None = None):
     """Walk matches chronologically; emit (X, y, w) with no Elo/form leakage.
 
-    Training matches are treated as neutral-venue with their competition weight.
-    Returns the fitted Elo model so the caller can reuse that exact state.
+    Ratings are anchored to the current published eloratings table (frozen); the
+    walk only fills recent-form buffers. Sample weights combine competition
+    importance with exponential time-decay, so recent results dominate. Returns the
+    fitted Elo model so the caller can reuse that exact state.
     """
+    from data.history import decay_weight
+
     if elo is None:
         from data.elo_priors import load_elo_priors
-        elo = EloModel(priors=load_elo_priors())
+        elo = EloModel(priors=load_elo_priors(), freeze_ratings=True)
     X, y, w = [], [], []
     for m in matches:
         X.append(feature_row(elo, poisson, m.home, m.away,
                              neutral=True, weight=m.weight))
         y.append(label(m.home_goals, m.away_goals))
-        w.append(m.weight)
+        w.append(m.weight * decay_weight(m.date))
         elo.update(m.home, m.away, m.home_goals, m.away_goals, weight=m.weight)
     return np.array(X), np.array(y), np.array(w), elo

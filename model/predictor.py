@@ -28,10 +28,14 @@ WC_WEIGHT = 3.0  # World Cup matches are maximally competitive
 
 class Predictor:
     def __init__(self, ingest_live: bool = True):
+        from data.history import decay_weight
+
         history = load_history()
         # Fit on ALL history for deployment (the train-only split in gbm.evaluate
-        # exists purely to measure generalization honestly).
-        self.poisson = PoissonModel().fit(history)
+        # exists purely to measure generalization honestly). Time-decay so recent
+        # scorelines weigh more; ratings come (frozen) from current eloratings.
+        decay = [m.weight * decay_weight(m.date) for m in history]
+        self.poisson = PoissonModel().fit(history, weights=decay)
         X, y, w, elo = build_features(history, self.poisson)
         self.elo = elo
         self.gbm = GBMOutcomeModel().train(X, y, sample_weight=w)
@@ -39,7 +43,8 @@ class Predictor:
             self._ingest_live_results()
 
     def _ingest_live_results(self) -> None:
-        """Update Elo/form with finished 2026 matches so form is current."""
+        """Fold finished 2026 matches into the recent-form buffers (ratings stay
+        anchored to the published eloratings table, which already reflects them)."""
         t = load_tournament()
         for m in sorted((m for m in t.matches if m.played),
                         key=lambda m: m.utc_date or ""):

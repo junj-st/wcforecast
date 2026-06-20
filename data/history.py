@@ -49,6 +49,21 @@ class HistMatch:
     weight: float
 
 
+def decay_weight(date_iso: str, half_life_years: float = 2.0,
+                 ref_iso: str | None = None) -> float:
+    """Exponential recency weight: a match `half_life_years` old counts half.
+
+    Lets the Poisson and GBM lean on current form without discarding older data.
+    """
+    ref = date.fromisoformat(ref_iso) if ref_iso else date.today()
+    try:
+        age_days = (ref - date.fromisoformat(date_iso)).days
+    except ValueError:
+        return 1.0
+    age_days = max(0, age_days)
+    return 0.5 ** (age_days / (365.25 * half_life_years))
+
+
 def _load_key() -> str:
     key = os.environ.get("API_FOOTBALL_KEY")
     if key:

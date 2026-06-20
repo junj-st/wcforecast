@@ -28,24 +28,30 @@ class PoissonModel:
         self.intercept: float = 0.0
         self.home_coef: float = 0.0
 
-    def fit(self, matches) -> "PoissonModel":
+    def fit(self, matches, weights=None) -> "PoissonModel":
+        """Fit attack/defense coefficients. `weights` (parallel to matches) lets the
+        caller apply time-decay so recent scorelines count more; defaults to each
+        match's competition weight."""
         teams = sorted({m.home for m in matches} | {m.away for m in matches})
         self.teams = teams
         self.idx = {t: i for i, t in enumerate(teams)}
         n = len(teams)
+        if weights is None:
+            weights = [m.weight for m in matches]
 
         # Design: [attack one-hot (n) | defense one-hot (n) | home flag]
-        rows, goals, weights = [], [], []
-        for m in matches:
+        rows, goals, w = [], [], []
+        for m, mw in zip(matches, weights):
             hi, ai = self.idx[m.home], self.idx[m.away]
             # home side attacking, at home
             r1 = np.zeros(2 * n + 1)
             r1[hi] = 1; r1[n + ai] = 1; r1[-1] = 1
-            rows.append(r1); goals.append(m.home_goals); weights.append(m.weight)
+            rows.append(r1); goals.append(m.home_goals); w.append(mw)
             # away side attacking, not at home
             r2 = np.zeros(2 * n + 1)
             r2[ai] = 1; r2[n + hi] = 1; r2[-1] = 0
-            rows.append(r2); goals.append(m.away_goals); weights.append(m.weight)
+            rows.append(r2); goals.append(m.away_goals); w.append(mw)
+        weights = w
 
         X = np.array(rows)
         y = np.array(goals)
