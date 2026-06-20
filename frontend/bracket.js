@@ -17,7 +17,7 @@ const Bracket = (function () {
       const rows = d[letter].map(r => `
         <div class="group-row ${r.position <= 2 ? "q" + r.position : ""}" data-team="${r.canonical}">
           <span class="pos">${r.position}</span>
-          <span class="name">${r.team}</span>
+          <span class="name"><span class="dot" style="background:${teamColor(r.canonical)}"></span>${r.team}</span>
           <span class="pts">${r.points}</span>
           <span class="gd">${r.played ? (r.goal_difference > 0 ? "+" : "") + r.goal_difference : "·"}</span>
         </div>`).join("");
@@ -32,10 +32,10 @@ const Bracket = (function () {
       <div class="tie">
         <div class="mno">Match ${m.match}</div>
         <div class="side" data-team="${m.home_canonical || ""}">
-          <span>${m.home || "TBD"}</span><span class="slot">${m.home_slot}</span>
+          <span><span class="dot" style="background:${teamColor(m.home_canonical)}"></span>${m.home || "TBD"}</span><span class="slot">${m.home_slot}</span>
         </div>
         <div class="side" data-team="${m.away_canonical || ""}">
-          <span>${m.away || "TBD"}</span><span class="slot">${m.away_slot}</span>
+          <span><span class="dot" style="background:${teamColor(m.away_canonical)}"></span>${m.away || "TBD"}</span><span class="slot">${m.away_slot}</span>
         </div>
       </div>`).join("");
   }

@@ -9,9 +9,17 @@ let titleChart = null;
 const groupOf = {}; // canonical -> group letter, from /teams
 
 function probColor(p) {
-  // transparent teal -> solid teal as probability rises
+  // cobalt blue (low) -> signature lime (high), the 2026 blue->lime ramp
   const a = Math.min(1, Math.max(0, p));
-  return `rgba(54, 194, 164, ${0.08 + a * 0.92})`;
+  const r = Math.round(59 + a * 122);
+  const g = Math.round(91 + a * 135);
+  const b = Math.round(219 - a * 198);
+  return `rgba(${r}, ${g}, ${b}, ${0.18 + a * 0.82})`;
+}
+
+function probTextColor(p) {
+  // dark text on the bright lime end, light on the dim blue end
+  return p > 0.45 ? "#0b1033" : "#eef1ff";
 }
 
 function fmtPct(p) {
@@ -66,11 +74,11 @@ function renderTable() {
   const tbody = document.querySelector("#probTable tbody");
   tbody.innerHTML = rows.map(t => `
     <tr>
-      <td class="left team">${t.name}</td>
+      <td class="left team"><span class="dot" style="background:${teamColor(t.canonical)}"></span>${t.name}</td>
       <td class="left">${groupOf[t.canonical] || ""}</td>
       ${stages.map(s => {
         const p = t[s];
-        return `<td><span class="prob-cell" style="background:${probColor(p)};padding:2px 6px;">${fmtPct(p)}</span></td>`;
+        return `<td><span class="prob-cell" style="background:${probColor(p)};color:${probTextColor(p)};padding:2px 6px;">${fmtPct(p)}</span></td>`;
       }).join("")}
     </tr>`).join("");
   document.querySelectorAll("#probTable th").forEach(th => {
@@ -88,7 +96,7 @@ function renderChart() {
       labels: top.map(t => t.name),
       datasets: [{
         data: top.map(t => +(t.WINNER * 100).toFixed(1)),
-        backgroundColor: "rgba(54,194,164,0.8)",
+        backgroundColor: top.map(t => teamColor(t.canonical)),
         borderRadius: 4,
       }],
     },
@@ -96,8 +104,8 @@ function renderChart() {
       plugins: { legend: { display: false },
         tooltip: { callbacks: { label: c => `${c.parsed.y}% to win` } } },
       scales: {
-        y: { ticks: { color: "#8b98a5", callback: v => v + "%" }, grid: { color: "#2e3a46" } },
-        x: { ticks: { color: "#e6edf3" }, grid: { display: false } },
+        y: { ticks: { color: "#9aa3d6", callback: v => v + "%" }, grid: { color: "#2c3680" } },
+        x: { ticks: { color: "#eef1ff" }, grid: { display: false } },
       },
     },
   });

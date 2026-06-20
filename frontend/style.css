@@ -1,13 +1,15 @@
 :root {
-  --bg: #0f1419;
-  --panel: #1a2129;
-  --panel-2: #222c36;
-  --line: #2e3a46;
-  --text: #e6edf3;
-  --muted: #8b98a5;
-  --accent: #36c2a4;
-  --accent-2: #4f9cf9;
-  --hot: #36c2a4;
+  /* World Cup 2026 official palette: navy base, cobalt + lime accents */
+  --bg: #0b1033;
+  --panel: #131a4d;
+  --panel-2: #1a225f;
+  --line: #2c3680;
+  --text: #eef1ff;
+  --muted: #9aa3d6;
+  --accent: #3b5bdb;     /* cobalt blue */
+  --lime: #b5e215;       /* signature 2026 lime */
+  --lime-deep: #97bd12;
+  --navy: #16205e;
 }
 * { box-sizing: border-box; }
 body {
@@ -17,11 +19,22 @@ body {
   color: var(--text);
   font-size: 14px;
 }
-header {
-  padding: 20px 28px 0;
-  border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, #151c24, var(--bg));
+
+/* official 2026 retro-stripe colorway across the very top */
+.top-stripe {
+  height: 5px;
+  background: linear-gradient(90deg,
+    #b5e215 0%, #119a6a 18%, #3b5bdb 36%, #6a9be8 50%,
+    #e23b2e 68%, #f0682a 84%, #8b1a1a 100%);
 }
+
+header {
+  padding: 18px 28px 0;
+  border-bottom: 1px solid var(--line);
+  background: #131b4d;
+}
+.header-top { display: flex; align-items: center; gap: 14px; }
+.logo { width: 40px; height: 40px; object-fit: contain; }
 h1 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
 .subtitle { margin: 4px 0 14px; color: var(--muted); font-size: 13px; }
 nav { display: flex; gap: 4px; }
@@ -31,7 +44,7 @@ nav { display: flex; gap: 4px; }
   border-bottom: 2px solid transparent;
 }
 .tab:hover { color: var(--text); }
-.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab.active { color: var(--lime); border-bottom-color: var(--lime); }
 
 main { padding: 24px 28px; max-width: 1100px; margin: 0 auto; }
 .view { display: none; }
@@ -45,8 +58,9 @@ select, button {
   border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px;
   font-size: 13px; cursor: pointer;
 }
-button:hover { border-color: var(--accent); }
-button#runSim { background: var(--accent); color: #06231d; border-color: var(--accent); font-weight: 600; }
+button:hover { border-color: var(--lime); }
+button#runSim { background: var(--lime); color: var(--navy); border-color: var(--lime); font-weight: 700; }
+button#runSim:hover { background: var(--lime-deep); border-color: var(--lime-deep); }
 .status { color: var(--muted); font-size: 12px; }
 
 .chart-wrap, .table-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
@@ -57,11 +71,16 @@ th, td { padding: 9px 12px; text-align: right; font-variant-numeric: tabular-num
 th.left, td.left { text-align: left; }
 thead th { background: var(--panel-2); color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; }
 thead th:hover { color: var(--text); }
-th.sorted { color: var(--accent); }
+th.sorted { color: var(--lime); }
 tbody tr { border-top: 1px solid var(--line); }
-tbody tr:hover { background: #1f2730; }
+tbody tr:hover { background: #1a2258; }
 td.team { font-weight: 500; }
-.prob-cell { color: #06231d; font-weight: 600; border-radius: 4px; }
+.dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  margin-right: 7px; vertical-align: middle;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18);
+}
+.prob-cell { color: #fff; font-weight: 600; border-radius: 4px; }
 
 /* bracket view */
 .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
@@ -69,7 +88,7 @@ td.team { font-weight: 500; }
 .group-card h3 { margin: 0 0 6px; font-size: 12px; color: var(--muted); letter-spacing: 0.05em; }
 .group-row { display: grid; grid-template-columns: 16px 1fr 30px 30px; gap: 6px; padding: 3px 0; font-size: 12.5px; cursor: pointer; border-radius: 4px; }
 .group-row .pos { color: var(--muted); }
-.group-row.q1 .pos, .group-row.q2 .pos { color: var(--accent); }
+.group-row.q1 .pos, .group-row.q2 .pos { color: var(--lime); font-weight: 700; }
 .group-row .pts { text-align: right; font-variant-numeric: tabular-nums; }
 .group-row .gd { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
 
@@ -79,7 +98,7 @@ td.team { font-weight: 500; }
 .tie .side { display: flex; justify-content: space-between; padding: 3px 0; cursor: pointer; border-radius: 4px; }
 .tie .slot { color: var(--muted); font-size: 11px; }
 
-.highlight { background: var(--accent) !important; color: #06231d !important; }
-.highlight .pos, .highlight .gd, .highlight .slot { color: #06231d !important; }
+.highlight { background: var(--lime) !important; color: var(--navy) !important; }
+.highlight .pos, .highlight .gd, .highlight .slot { color: var(--navy) !important; }
 
 footer { padding: 16px 28px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }

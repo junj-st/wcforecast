@@ -4,13 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Cup 2026 Forecast</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=7" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
+  <div class="top-stripe"></div>
   <header>
-    <h1>World Cup 2026 — Forecast</h1>
-    <p class="subtitle">Poisson + Elo + gradient-boosted predictor → Monte Carlo tournament simulation</p>
+    <div class="header-top">
+      <img class="logo" src="forecast-logo.png?v=7" alt="World Cup 2026" />
+      <div>
+        <h1>World Cup 2026 — Forecast</h1>
+        <p class="subtitle">Elo + Poisson + gradient-boosted predictor → Monte Carlo tournament simulation</p>
+      </div>
+    </div>
     <nav>
       <button class="tab active" data-view="dashboard">Probability Dashboard</button>
       <button class="tab" data-view="bracket">Bracket</button>
@@ -72,8 +78,9 @@
     <span id="meta"></span>
   </footer>
 
-  <script src="probabilities.js"></script>
-  <script src="bracket.js"></script>
+  <script src="team-colors.js?v=7"></script>
+  <script src="probabilities.js?v=7"></script>
+  <script src="bracket.js?v=7"></script>
   <script>
     // simple tab switching
     document.querySelectorAll('.tab').forEach(btn => {

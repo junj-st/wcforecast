@@ -49,7 +49,12 @@ class HistMatch:
     weight: float
 
 
-def decay_weight(date_iso: str, half_life_years: float = 2.0,
+# Recency half-life for time-decay weighting, in years. Tuned on a time-ordered
+# holdout (log-loss optimum ~1.5y); shorter leans harder on recent form.
+HALF_LIFE_YEARS = 1.5
+
+
+def decay_weight(date_iso: str, half_life_years: float = HALF_LIFE_YEARS,
                  ref_iso: str | None = None) -> float:
     """Exponential recency weight: a match `half_life_years` old counts half.
 

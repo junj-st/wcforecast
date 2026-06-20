@@ -25,6 +25,15 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def no_store_frontend(request, call_next):
+    """Frontend assets change often during dev; never let the browser cache them."""
+    response = await call_next(request)
+    if request.url.path.startswith("/app"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
+
+
 @app.get("/teams")
 def teams():
     t = engine.get_tournament()
