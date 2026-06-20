@@ -45,13 +45,14 @@ class TeamState:
 
 
 class EloModel:
-    def __init__(self, k: float = 32.0):
+    def __init__(self, k: float = 32.0, priors: dict[str, float] | None = None):
         self.k = k
+        self.priors = priors or {}
         self.teams: dict[str, TeamState] = {}
 
     def state(self, team: str) -> TeamState:
         if team not in self.teams:
-            self.teams[team] = TeamState()
+            self.teams[team] = TeamState(rating=self.priors.get(team, BASE_RATING))
         return self.teams[team]
 
     def rating(self, team: str) -> float:
@@ -89,8 +90,9 @@ class EloModel:
 
 if __name__ == "__main__":
     from data.history import load_history
+    from data.elo_priors import load_elo_priors
 
-    elo = EloModel().fit(load_history())
+    elo = EloModel(priors=load_elo_priors()).fit(load_history())
     print("Top 20 by trained Elo:")
     for i, (team, st) in enumerate(elo.rankings(20), 1):
         print(f"  {i:2}. {team:24} {st.rating:7.1f}  ({st.games} games)")

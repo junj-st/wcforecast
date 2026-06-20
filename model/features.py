@@ -61,7 +61,9 @@ def build_features(matches, poisson: PoissonModel, elo: EloModel | None = None):
     Training matches are treated as neutral-venue with their competition weight.
     Returns the fitted Elo model so the caller can reuse that exact state.
     """
-    elo = elo or EloModel()
+    if elo is None:
+        from data.elo_priors import load_elo_priors
+        elo = EloModel(priors=load_elo_priors())
     X, y, w = [], [], []
     for m in matches:
         X.append(feature_row(elo, poisson, m.home, m.away,

@@ -34,8 +34,8 @@ TRAINING_SOURCES = [
     (6, 2023, 2.5),   # Africa Cup of Nations 2023
     (5, 2024, 1.8),   # UEFA Nations League 2024-25
     (5, 2022, 1.8),   # UEFA Nations League 2022-23
-    (10, 2024, 1.0),  # Friendlies 2024
-    (10, 2023, 1.0),  # Friendlies 2023
+    (10, 2024, 0.35),  # Friendlies 2024 — heavily discounted (weak/rotated sides)
+    (10, 2023, 0.35),  # Friendlies 2023
 ]
 
 

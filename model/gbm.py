@@ -18,7 +18,11 @@ from sklearn.frozen import FrozenEstimator
 from sklearn.metrics import log_loss, accuracy_score
 
 CLASSES = ["home_win", "draw", "away_win"]
-BLEND_WEIGHT = 0.5   # weight on the GBM in the GBM/Elo blend; rest goes to Elo
+# Weight on the GBM in the GBM/Elo blend (rest goes to the Elo baseline).
+# Cross-validated optimum: once Elo carries real eloratings.net priors it is very
+# hard to beat, so the GBM's best marginal contribution is small. Tuned on a
+# time-ordered holdout (see evaluate_pipeline) — higher weights degrade log loss.
+BLEND_WEIGHT = 0.1
 
 _GBM_PARAMS = dict(
     max_depth=2,
