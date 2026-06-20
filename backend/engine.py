@@ -80,21 +80,26 @@ def projected_bracket() -> dict:
     from sim.bracket import R32_MATCHES, KO_TREE
 
     standings = current_standings()
-    slot_team: dict[str, str] = {}
+    slot_team: dict[str, tuple[str, str]] = {}   # slot -> (display, canonical)
     thirds = []
     for letter, rows in standings.items():
-        slot_team[f"W_{letter}"] = rows[0]["team"]
-        slot_team[f"RU_{letter}"] = rows[1]["team"]
+        slot_team[f"W_{letter}"] = (rows[0]["team"], rows[0]["canonical"])
+        slot_team[f"RU_{letter}"] = (rows[1]["team"], rows[1]["canonical"])
         thirds.append((letter, rows[2]))
     thirds.sort(key=lambda x: (x[1]["points"], x[1]["goal_difference"],
                                x[1]["goals_for"]), reverse=True)
     qualified = {letter for letter, _ in thirds[:8]}
-    third_team_by_group = {letter: row["team"] for letter, row in thirds}
+    third_team_by_group = {letter: (row["team"], row["canonical"])
+                           for letter, row in thirds}
     for slot, group in assign_third_slots(qualified).items():
         slot_team[slot] = third_team_by_group[group]
 
+    def disp(s):
+        return slot_team.get(s, (None, None))
+
     r32 = [{"match": m, "home_slot": sa, "away_slot": sb,
-            "home": slot_team.get(sa), "away": slot_team.get(sb)}
+            "home": disp(sa)[0], "home_canonical": disp(sa)[1],
+            "away": disp(sb)[0], "away_canonical": disp(sb)[1]}
            for m, (sa, sb) in sorted(R32_MATCHES.items())]
     tree = [{"match": m, "feeds_from": list(KO_TREE[m])} for m in sorted(KO_TREE)]
     return {"round_of_32": r32, "later_rounds": tree, "note":

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Cup 2026 Forecast</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>World Cup 2026 — Forecast</h1>
+    <p class="subtitle">Poisson + Elo + gradient-boosted predictor → Monte Carlo tournament simulation</p>
+    <nav>
+      <button class="tab active" data-view="dashboard">Probability Dashboard</button>
+      <button class="tab" data-view="bracket">Bracket</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- DASHBOARD VIEW -->
+    <section id="dashboard" class="view active">
+      <div class="controls">
+        <label>Simulations:
+          <select id="nSims">
+            <option value="2000">2,000 (fast)</option>
+            <option value="10000" selected>10,000</option>
+            <option value="20000">20,000</option>
+          </select>
+        </label>
+        <button id="runSim">Run simulation</button>
+        <span id="simStatus" class="status"></span>
+      </div>
+
+      <div class="chart-wrap">
+        <h2>Title probability</h2>
+        <canvas id="titleChart" height="120"></canvas>
+      </div>
+
+      <h2>Stage-by-stage probabilities <span class="hint">(click a column to sort)</span></h2>
+      <div class="table-wrap">
+        <table id="probTable">
+          <thead>
+            <tr>
+              <th data-key="name" class="left">Team</th>
+              <th data-key="group" class="left">Grp</th>
+              <th data-key="R32">R32</th>
+              <th data-key="R16">R16</th>
+              <th data-key="QF">QF</th>
+              <th data-key="SF">SF</th>
+              <th data-key="FINAL">Final</th>
+              <th data-key="WINNER" class="sorted">Win</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BRACKET VIEW -->
+    <section id="bracket" class="view">
+      <p class="hint">Group tables use real results so far. Round-of-32 slots are seeded from
+        current standings and update as matches finish. Click a team to highlight it.</p>
+      <h2>Groups</h2>
+      <div id="groups" class="groups-grid"></div>
+      <h2>Round of 32 <span class="hint">(projected)</span></h2>
+      <div id="r32" class="r32-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="meta"></span>
+  </footer>
+
+  <script src="probabilities.js"></script>
+  <script src="bracket.js"></script>
+  <script>
+    // simple tab switching
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.view).classList.add('active');
+        if (btn.dataset.view === 'bracket') Bracket.ensureLoaded();
+      });
+    });
+  </script>
+</body>
+</html>
