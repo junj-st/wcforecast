@@ -9,12 +9,6 @@ Carlo tournament simulator (10,000 runs) that estimates every team's probability
 of reaching each stage, served through a FastAPI backend and an interactive
 bracket/dashboard frontend.
 
-```
- football-data.org (live 2026) ─┐
-                                ├─► data/  ─► model/ ─► sim/ ─► backend/ ─► frontend/
- api-football (2022-24 history) ─┤        (normalize) (predict) (10k sims) (FastAPI)  (bracket+dashboard)
- eloratings.net (current Elo)  ─┘
-```
 
 ## Data sources
 
